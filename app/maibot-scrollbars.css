@@ -1,0 +1,54 @@
+/* Copied from MaiBot WebUI dashboard/src/styles/millennium.css.
+ * Source file commit: 4ef9e14bdd45cf3b7d0fa1921abe5a5566be7768.
+ * GNU GPL v3; see vendor/maibot-webui/LICENSE and README.md.
+ * Theme selectors/tokens are mapped locally; tracks remain transparent so
+ * different page, panel and input surfaces show through without a color strip.
+ */
+
+:is(:root, :root *) {
+  scrollbar-color: var(--drop) transparent;
+}
+
+/* Chromium 设置 scrollbar-color 后会忽略原生滑块的形状样式，
+   使用 WebKit 绘制路径实现方角和塑料按键边框；其他浏览器保留标准配色。 */
+@supports selector(::-webkit-scrollbar) {
+  :is(:root, :root *) {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  :is(:root, :root *)::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+  }
+
+  /* Native viewport scrollbars do not expose the canvas background image. */
+  :root::-webkit-scrollbar, :root body::-webkit-scrollbar {
+    background-color: var(--desktop);
+    background-image: radial-gradient(var(--desktop-dot) 1px, transparent 1px);
+    background-size: 6px 6px;
+    background-position-x: calc(14px - 100vw);
+  }
+
+  :is(:root, :root *)::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  :is(:root, :root *)::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-key);
+    border: 2px solid var(--line);
+    border-radius: 0;
+    box-shadow: var(--bevel);
+  }
+
+  :is(:root, :root *)::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-key-hover);
+  }
+
+  :is(:root, :root *)::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}

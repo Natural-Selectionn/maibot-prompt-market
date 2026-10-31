@@ -1,0 +1,38 @@
+:root[data-dashboard-style='millennium'] * {
+  scrollbar-color: var(--mil-drop) transparent;
+}
+
+/* Chromium 设置 scrollbar-color 后会忽略原生滑块的形状样式，
+   使用 WebKit 绘制路径实现方角和塑料按键边框；其他浏览器保留标准配色。 */
+@supports selector(::-webkit-scrollbar) {
+  :root[data-dashboard-style='millennium'] * {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+
+  :root[data-dashboard-style='millennium'] *::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  :root[data-dashboard-style='millennium'] *::-webkit-scrollbar-track {
+    background: var(--mil-shell);
+    border-radius: 0;
+    box-shadow: inset 2px 2px 0 var(--mil-lo);
+  }
+
+  :root[data-dashboard-style='millennium'] *::-webkit-scrollbar-thumb {
+    background: var(--mil-key);
+    border: 2px solid var(--mil-line);
+    border-radius: 0;
+    box-shadow: var(--mil-bevel);
+  }
+
+  :root[data-dashboard-style='millennium'] *::-webkit-scrollbar-thumb:hover {
+    background: var(--mil-key-hover);
+  }
+
+  :root[data-dashboard-style='millennium'] *::-webkit-scrollbar-corner {
+    background: var(--mil-shell);
+  }
+}

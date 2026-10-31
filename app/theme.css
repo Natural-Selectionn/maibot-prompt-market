@@ -1,0 +1,132 @@
+/* MaiBot OneKey Millennium palette: daytime plastic and the same chassis at night. */
+:root {
+  --desktop: #c8c0ac;
+  --desktop-dot: #77705e30;
+  --shell-dot: #5a544a17;
+  --float-shadow: #736b5940;
+  --focus: #2f8c55;
+  --plate-ink: #f3eee1;
+  --key-hi: #fffaf0;
+  --key-hover: #fbf7ec;
+  --scrollbar-key: color-mix(in srgb, var(--key) 95%, black);
+  --scrollbar-key-hover: color-mix(in srgb, var(--key-hover) 95%, black);
+  --hot-ink: #3a2a22;
+  --hot-hi: #ffffff55;
+  --muted: #8c826f;
+  --accent: #5ca673;
+  --rust: #d27950;
+  --screen-dim: #77705f;
+  --screen-ink: #413e37;
+  --placeholder: #a6a091;
+  --soft-panel: #e3dbc7;
+  --card: #f0eadb;
+  --badge-line: #6a8c6c;
+  --badge-bg: #b9e5b8;
+  --on-ink: #365c41;
+  --icon-bg: #f1c28f;
+  --icon-hi: #ffdeae;
+  --icon-ink: #6a4b32;
+  --screen-line: #99917f;
+  --screen-shade: #00000019;
+  --screen-grid: #00000007;
+  --error-line: #aa7458;
+  --error-bg: #f7e1ce;
+  --error-ink: #9a543a;
+  --veil: #3c362c99;
+  --on-hi: #d5f4d7;
+  --tag-bg: #e1d8c4;
+  --tag-line: #bdb39d;
+  --danger: #9d4839;
+  --rule: #bfb6a1;
+  --warning-line: #c69a55;
+  --warning-bg: #f8e8b3;
+  --warning-ink: #80623d;
+  --tag-ink: #6d7662;
+  --rating: #bc8651;
+  --star-dim: #a79b83;
+  --star: #d38d45;
+  --star-fill: #f1bc65;
+  --comment-line: #b3aa96;
+  --comment-bg: #f1ebdd;
+  --note-ink: #668168;
+  --note-line: #b4b79e;
+  --note-bg: #e7e9d9;
+  --file-line: #72836b;
+  --file-bg: #dce7cd;
+  --file-ink: #344b34;
+  --on-dim: #47634a;
+  --plate: #5a544a;
+}
+
+:root[data-theme="dark"] {
+  --shell: #2f2c28;
+  --panel: #3a3631;
+  --hi: #4a453f;
+  --lo: #2a2723;
+  --drop: #1d1b18;
+  --line: #171513;
+  --ink: #ebe4d2;
+  --print: #b5ad9a;
+  --screen: #1e221e;
+  --screen-ink: #e8e2cf;
+  --screen-dim: #a8a290;
+  --key: #4d4841;
+  --key-side: #2e2b27;
+  --key-hi: #5d574f;
+  --key-hover: #58524a;
+  --desktop: #211f1c;
+  --desktop-dot: #ffffff08;
+  --shell-dot: #ffffff09;
+  --float-shadow: #00000073;
+  --focus: #8fd6a0;
+  --plate: #ebe4d2;
+  --plate-ink: #2f2c28;
+  --hot-ink: #2a1c14;
+  --muted: #b5ad9a;
+  --accent: #8fd6a0;
+  --rust: #f08a5d;
+  --placeholder: #969382;
+  --soft-panel: #332f2b;
+  --card: #3a3631;
+  --badge-line: #171513;
+  --badge-bg: #8fd6a0;
+  --on-ink: #1f2a20;
+  --screen-line: #171513;
+  --screen-shade: #00000066;
+  --screen-grid: #ffffff08;
+  --error-line: #bd7057;
+  --error-bg: #463027;
+  --error-ink: #f1ad89;
+  --veil: #0000008c;
+  --tag-bg: #443f39;
+  --tag-line: #5d574f;
+  --tag-ink: #bfd0b7;
+  --danger: #f09b85;
+  --rule: #4a453f;
+  --warning-line: #b49348;
+  --warning-bg: #4a3e22;
+  --warning-ink: #eed59c;
+  --rating: #f08a5d;
+  --star-dim: #918775;
+  --star: #eab85b;
+  --comment-line: #5d574f;
+  --comment-bg: #332f2b;
+  --note-ink: #bfd0b7;
+  --note-line: #59644e;
+  --note-bg: #333e32;
+  --file-line: #5c785a;
+  --file-bg: #263429;
+  --file-ink: #b0dfad;
+  --on-dim: #304d38;
+  color-scheme: dark;
+}
+
+.active-key,.toast,.retro-combo-trigger[data-popup-open]{color:var(--on-ink)}
+.theme-toggle .theme-sun{display:none}
+:root[data-theme="dark"] .theme-toggle .theme-sun{display:block}
+:root[data-theme="dark"] .theme-toggle .theme-moon{display:none}
+/* Reserve the viewport scrollbar space before asynchronous content arrives. */
+:root{scrollbar-gutter:stable;background-color:var(--desktop);background-image:radial-gradient(var(--desktop-dot) 1px,transparent 1px);background-size:6px 6px}
+.desktop{background-attachment:fixed}
+@media(max-width:500px){.brand-cn{display:none}}
+@media(max-width:360px){.publish-key{width:34px;min-width:34px;padding-left:0;padding-right:0}.publish-key span{display:none}}

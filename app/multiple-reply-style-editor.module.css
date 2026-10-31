@@ -1,0 +1,11 @@
+.editor { display: grid; gap: 12px; min-width: 0; padding: 12px; border: 2px solid var(--line); background: var(--panel); box-shadow: var(--bevel); }
+.heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+.heading strong { font-size: 12px; }
+.heading small { color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+.entries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.entry { display: grid; gap: 9px; min-width: 0; padding: 10px; border: 1px solid var(--rule); background: var(--screen); }
+.entryHeading { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.entryHeading strong { color: var(--accent); font-size: 11px; }
+.add { justify-self: start; }
+.add small { font-size: 10px; font-weight: 400; color: var(--muted); }
+@media (max-width: 600px) { .entries { grid-template-columns: minmax(0, 1fr); } .editor { padding: 10px; } .add { width: 100%; } }

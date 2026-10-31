@@ -1,0 +1,1 @@
+ALTER TABLE `prompts` ADD `template_basis` text DEFAULT 'snapshot-1.2.5' NOT NULL;

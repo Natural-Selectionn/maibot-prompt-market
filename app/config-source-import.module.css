@@ -1,0 +1,27 @@
+.source { display: grid; gap: 12px; min-width: 0; border: 2px solid var(--line); background: var(--panel); box-shadow: var(--bevel); padding: 12px; }
+.heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.heading strong { font-size: 12px; color: var(--accent); }
+.hint { margin: 0; font-size: 11px; line-height: 1.7; color: var(--muted); overflow-wrap: anywhere; }
+.source .upload { position: relative; display: inline-flex; cursor: pointer; color: var(--ink); }
+.source .upload input[type=file] { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+.upload:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+.upload:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.preview { display: grid; gap: 16px; min-width: 0; border-top: 1px solid var(--rule); padding-top: 12px; }
+.field { display: grid; gap: 7px; min-width: 0; }
+.source .choice { display: flex; align-items: flex-start; flex-wrap: wrap; column-gap: 8px; row-gap: 5px; cursor: pointer; font-size: 12px; line-height: 1.5; }
+.choice input[type=checkbox] { appearance: none; display: grid; place-content: center; flex: none; width: 18px; height: 18px; padding: 0; margin: 0; border: 2px solid var(--line); border-radius: 0; background: var(--screen); box-shadow: inset 2px 2px 0 var(--screen-shade); cursor: pointer; }
+.choice input[type=checkbox]:checked { background: var(--mint); box-shadow: inset 1px 1px 0 var(--on-hi); }
+.choice input[type=checkbox]::before { content: ""; width: 5px; height: 9px; border: solid var(--on-ink); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); visibility: hidden; }
+.choice input[type=checkbox]:checked::before { visibility: visible; }
+.choice span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.choice small { display: block; margin-top: 3px; font-size: 10px; overflow-wrap: anywhere; }
+.choice em { color: var(--accent); font-size: 10px; font-style: normal; font-weight: 400; line-height: 1.8; }
+.content { min-width: 0; max-height: 180px; overflow: auto; padding: 9px 10px; border: 2px solid var(--line); background: var(--screen); box-shadow: inset 3px 3px 0 var(--screen-shade); color: var(--screen-ink); font-size: 12px; font-weight: 400; line-height: 1.5; }
+.content:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.content pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.values { display: grid; gap: 9px; margin: 0; padding-left: 22px; }
+.values li { padding-left: 2px; }
+.values li::marker { color: var(--muted); }
+.actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--rule); padding-top: 12px; }
+@media (max-width: 500px) { .source { padding: 10px; } .choice em { flex-basis: 100%; padding-left: 26px; } .actions button { flex: 1 1 auto; padding-inline: 8px; } }
+@media (forced-colors: active) { .choice input[type=checkbox] { appearance: auto; } .choice input[type=checkbox]::before { display: none; } }
