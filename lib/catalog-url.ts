@@ -17,7 +17,7 @@ export function readCatalogState(params: URLSearchParams): CatalogState {
 }
 export function writeCatalogState(url: URL, state: CatalogState): URL {
   const next = new URL(url);
-  for (const key of ["q", "tag", "kind", "category", "version", "sort"]) next.searchParams.delete(key);
+  for (const key of ["q", "tag", "kind", "category", "version", "sort", "variant"]) next.searchParams.delete(key);
   const parsed = parseSearch(state.search);
   if (parsed.query) next.searchParams.set("q", parsed.query);
   for (const tag of parsed.tags) next.searchParams.append("tag", tag);

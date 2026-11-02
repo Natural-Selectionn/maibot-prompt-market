@@ -1,0 +1,23 @@
+@media (min-width: 781px) {
+  .catalog :global(.workspace) { padding: 32px; }
+  .catalog :global(.workspace-heading) { margin-bottom: 26px; }
+  .catalog :global(.control-panel) { margin-bottom: 24px; }
+
+  .catalog .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    align-content: start;
+    min-width: 0;
+    gap: 14px;
+    padding: 24px;
+  }
+  .grid :global(.archive-card) { min-height: 370px; padding: 14px; }
+  .grid :global(.card-heading) { margin-top: 16px; }
+  .grid :global(.card-name) { font-size: 16px; }
+  .grid :global(.card-description) { margin-top: 11px; margin-bottom: 10px; font-size: 12px; line-height: 1.75; -webkit-line-clamp: 3; }
+  .grid :global(.card-preview) { padding: 10px; font-size: 12px; line-height: 1.75; }
+  .grid :global(.card-preview), .grid :global(.search-match) { flex: 1; min-height: 110px; }
+  .grid :global(.card-preview-text), .grid :global(.search-match)>span { -webkit-line-clamp: 5; }
+  .grid :global(.card-stats) { margin-top: 13px; gap: 8px 13px; }
+  .grid :global(.card-bottom) { padding-top: 14px; }
+}

@@ -1,29 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ArrowDown, FileText, GitBranch, Mail, Pencil, RefreshCw, Save, ShieldCheck, LogOut, Trash2, UserRound } from "lucide-react";
+import { FileText, GitBranch, Mail, Pencil, RefreshCw, Save, ShieldCheck, LogOut, Trash2, UserRound } from "lucide-react";
 import { formatVersionRange } from "@/lib/version-range.mjs";
 import { AccountName } from "@/components/account-name";
 import { TemplateFileList } from "@/components/template-file-list";
-import { promptTitle, type CommunityStats, type Kind, type PromptItem } from "@/lib/prompts";
+import { promptTitle, type PromptItem } from "@/lib/prompts";
+import { useAuthorWorks } from "@/hooks/use-author-works";
+import { WorkPagination } from "@/components/work-pagination";
+import { WorkListScroll } from "@/components/work-list-scroll";
+import scrollStyles from "@/components/work-list-scroll.module.css";
 import type { LoginUser, ProviderStatus } from "./test-login";
 import EmailAuthForm from "./email-auth-form";
 import AccountReviews, { type PendingSummary } from "./account-reviews";
-
-type ResponseData = { error?: string; items?: PromptItem[]; hasMore?: boolean; stats?: Record<string, CommunityStats> };
 
 export default function AccountPanel({ onLogout, user, revision, onUser, onOpen, onEdit, onDelete, deletingId, notify }: { onLogout: () => void; user: LoginUser; revision: number; onUser: (user: LoginUser) => void; onOpen: (item: PromptItem) => void; onEdit: (item: PromptItem) => void; onDelete: (item: PromptItem) => void; deletingId: string | null; notify: (message: string) => void }) {
   const [displayName, setDisplayName] = useState(user.displayName);
   const [saving, setSaving] = useState(false);
   const [profileError, setProfileError] = useState("");
-  const [kind, setKind] = useState<Kind | "">("");
-  const [items, setItems] = useState<PromptItem[]>([]);
-  const [stats, setStats] = useState<Record<string, CommunityStats>>({});
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [pending, setPending] = useState<PendingSummary>({ count: 0, loading: true, failed: false });
+  const { kind, pageIndex, items, stats, hasMore, loading, error, changeKind, changePage, retryLoad } = useAuthorWorks({ scope: "mine=1", revision, refresh, enabled: !pending.loading });
   const reviewSettled = useCallback(() => setRefresh(value => value + 1), []);
   const [securityOpen, setSecurityOpen] = useState(false);
   const [auth, setAuth] = useState<ProviderStatus | null>(null);
@@ -33,21 +30,6 @@ export default function AccountPanel({ onLogout, user, revision, onUser, onOpen,
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- The server-normalized account name must replace the editable draft after a profile update.
   useEffect(() => { setDisplayName(user.displayName); }, [user.displayName]);
-  const url = useCallback((offset = 0) => `/api/prompts?mine=1&kind=${kind}&offset=${offset}`, [kind]);
-  useEffect(() => {
-    // The owned pending read may finish an expired job before loading works.
-    if (pending.loading) return;
-    const controller = new AbortController();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Wait for pending-review recovery before replacing the account list for the new filters/revision.
-    setLoading(true); setError("");
-    fetch(url(), { signal: controller.signal }).then(async response => {
-      const data = await response.json() as ResponseData;
-      if (!response.ok) throw new Error(data.error || "作品加载失败。");
-      setItems(data.items ?? []); setStats(data.stats ?? {}); setHasMore(!!data.hasMore);
-    }).catch(cause => { if (cause.name !== "AbortError") { setItems([]); setError(cause.message); } })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [url, revision, refresh, pending.loading]);
   const saveProfile = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setProfileError("");
     try {
@@ -57,16 +39,6 @@ export default function AccountPanel({ onLogout, user, revision, onUser, onOpen,
       onUser(data.user); notify("昵称已保存");
     } catch (cause) { setProfileError(cause instanceof Error ? cause.message : "保存失败。"); }
     finally { setSaving(false); }
-  };
-  const more = async () => {
-    setLoading(true); setError("");
-    try {
-      const response = await fetch(url(items.length));
-      const data = await response.json() as ResponseData;
-      if (!response.ok) throw new Error(data.error || "作品加载失败。");
-      setItems(previous => [...previous, ...(data.items ?? [])]); setStats(previous => ({ ...previous, ...data.stats })); setHasMore(!!data.hasMore);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "作品加载失败。"); }
-    finally { setLoading(false); }
   };
 
   return <>
@@ -85,14 +57,16 @@ export default function AccountPanel({ onLogout, user, revision, onUser, onOpen,
         </div></section>
 
       </aside>
-      <section className="library-panel account-library" aria-label="我的发布"><div className="panel-bar"><div><FileText size={15}/><strong>我的发布</strong></div><button type="button" className="key icon-key small-key" onClick={() => setRefresh(value => value + 1)} aria-label="刷新我的发布"><RefreshCw size={14}/></button></div>
-        <div className="subcategories" role="group" aria-label="我的作品类型">{([{ value: "", label: "全部" }, { value: "config", label: "人格与聊天配置" }, { value: "template", label: "Prompt 管理" }] as const).map(option => <button type="button" key={option.value} onClick={() => setKind(option.value)} aria-pressed={kind === option.value} className={kind === option.value ? "active" : ""}>{option.label}</button>)}</div>
-        {error && <p className="load-error" role="alert">{error}</p>}
+      <section className={`library-panel account-library ${scrollStyles.panel}`} aria-label="我的发布"><div className="panel-bar"><div><FileText size={15}/><strong>我的发布</strong></div><button type="button" className="key icon-key small-key" onClick={() => setRefresh(value => value + 1)} aria-label="刷新我的发布"><RefreshCw size={14}/></button></div>
+        <div className="subcategories" role="group" aria-label="我的作品类型">{([{ value: "", label: "全部" }, { value: "config", label: "人格与聊天配置" }, { value: "template", label: "Prompt 管理" }] as const).map(option => <button type="button" key={option.value} onClick={() => changeKind(option.value)} aria-pressed={kind === option.value} className={kind === option.value ? "active" : ""}>{option.label}</button>)}</div>
+        <WorkListScroll label="我的发布列表" resetKey={`${kind}:${pageIndex}`}>
+        {error && <p className="load-error" role="alert">{error} <button type="button" className="text-link" onClick={retryLoad}>重试</button></p>}
         <AccountReviews key={user.accountTag} kind={kind} revision={revision} refresh={refresh} onSummary={setPending} onSettled={reviewSettled}/>
         <div className="account-works">{items.map(item => <article className="account-work" key={item.id}><div className="account-work-heading"><span className="card-type">{item.kind === "config" ? "人格与聊天配置" : "Prompt 管理"}</span><span className="account-work-version">{formatVersionRange(item)}</span></div><button type="button" className="account-work-title" onClick={() => onOpen(item)}>{promptTitle(item)}</button>{item.kind === "template" && <TemplateFileList item={item}/>}{item.description && <p className="account-work-description">{item.description}</p>}<div className="account-work-bottom"><div><time dateTime={item.updatedAt ?? item.createdAt}>{item.updatedAt ? "修改于 " : "发布于 "}{new Date(item.updatedAt ?? item.createdAt).toLocaleDateString("zh-CN")}</time><span>{stats[item.id]?.commentCount ?? 0} 条评论</span></div><span className="account-work-actions"><button type="button" className="key small-key" onClick={() => onEdit(item)} disabled={deletingId === item.id} aria-label={`编辑 ${promptTitle(item)}`}><Pencil size={13}/>编辑</button><button type="button" className="key small-key danger-key" onClick={() => onDelete(item)} disabled={deletingId !== null} aria-label={`删除 ${promptTitle(item)}`}><Trash2 size={13}/>{deletingId === item.id ? "删除中…" : "删除"}</button></span></div></article>)}</div>
         {!loading && !pending.loading && !items.length && !pending.count && !error && !pending.failed && <div className="empty-screen"><FileText size={22}/><strong>暂无发布</strong></div>}
         {loading && !items.length && <p className="account-loading" role="status">加载中…</p>}
-        {hasMore && <div className="more-row"><button type="button" className="key" onClick={more} disabled={loading}>{loading ? "加载中…" : "加载更多"}<ArrowDown size={14}/></button></div>}
+        </WorkListScroll>
+        {(items.length > 0 || pageIndex > 0) && <WorkPagination label="我的发布分页" pageIndex={pageIndex} hasMore={hasMore} loading={loading} onPage={changePage}/>}
       </section>
     </div>
   </>;

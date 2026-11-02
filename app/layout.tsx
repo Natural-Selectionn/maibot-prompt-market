@@ -7,6 +7,7 @@ import "./sort.css";
 import "./forum.css";
 import "./admin.css";
 import { ThemeProvider } from "@/components/theme";
+import { MaibotProvider } from "@/components/maibot-bridge";
 
 export const metadata: Metadata = {
   title: "麦麦提示词库 · MaiBot Prompt Exchange",
@@ -20,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <body><ThemeProvider>{children}</ThemeProvider></body>
+      <body><ThemeProvider><MaibotProvider>{children}</MaibotProvider></ThemeProvider></body>
     </html>
   );
 }

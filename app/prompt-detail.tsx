@@ -9,6 +9,8 @@ import { UsageStats } from "@/components/usage-stats";
 import { prepareUsage, recordUsage } from "@/lib/usage-client";
 import { downloadText } from "@/lib/download-text";
 import { toPersonalityJson } from "@/lib/personality-export";
+import { MaibotImport } from "@/components/maibot-import";
+import { useMaibot } from "@/components/maibot-bridge";
 import { fieldLabels, fieldPaths, filledConfigFields, getTemplate, promptTitle, templateDownloadName, templateFilesFor, type CommunityStats, type PromptItem } from "@/lib/prompts";
 import CommunityPanel from "./community-panel";
 
@@ -28,6 +30,7 @@ function DetailField({ title, caption, filename, initiallyExpanded = true, onCop
 }
 
 export default function PromptDetail({ focusCommentId, onLocated, item, stats, signedIn, onLogin, onClose, onDelete, onEdit, onTag, onStats, notify }: { focusCommentId?: string|null; onLocated?: () => void; item: PromptItem; stats: CommunityStats; signedIn: boolean; onLogin: () => void; onClose: () => void; onDelete: (item: PromptItem) => void; onEdit: (item: PromptItem) => void; onTag?: (tag: string) => void; onStats: (id: string, stats: CommunityStats, changed?: boolean) => void; notify: (message: string) => void }) {
+  const { fromWebui } = useMaibot();
   useEffect(() => { void prepareUsage(true); }, [signedIn]);
   const track = (action: "copy" | "download") => {
     void recordUsage(item.id, action).then(next => { if (next) onStats(item.id, next, true); });
@@ -51,6 +54,8 @@ export default function PromptDetail({ focusCommentId, onLocated, item, stats, s
     else download(content, "maibot-personality.json", "application/json;charset=utf-8");
   };
   const files = templateFilesFor(item);
+  const webuiActions = fromWebui && hasPersonality;
+  const ownerActions = item.mine && <><button className="key" onClick={() => onEdit(item)}><Pencil size={15}/>编辑</button><button className="key danger-key" onClick={() => onDelete(item)}><Trash2 size={15}/>删除</button></>;
   return <WindowDialog title="作品详情" subtitle="PROMPT / VIEW" onClose={onClose}>
     <div className="detail-heading"><div className="detail-heading-icon"><BookOpenText size={22}/></div><div><span className="micro-label">{item.kind === "template" ? "Prompt 管理" : "人格与聊天配置"}{item.kind === "template" && item.category ? ` / ${item.category}` : ""}{item.sample ? " / 示例" : ""}</span><h2>{promptTitle(item)}</h2>{item.description && <p>{item.description}</p>}</div></div>
     <div className="detail-meta"><span>作者：<AccountName name={item.author} tag={item.authorTag} profileTag={item.authorProfileTag}/></span><span>支持版本（作者声明）：{formatVersionRange(item)}</span>{item.tags.map(tag => onTag ? <button key={tag} className="detail-tag" onClick={() => onTag(tag)}>#{tag}</button> : <span key={tag}>#{tag}</span>)}</div>
@@ -59,7 +64,8 @@ export default function PromptDetail({ focusCommentId, onLocated, item, stats, s
       const text = Array.isArray(value) ? value.join("\n") : String(value);
       return <DetailField key={key} title={fieldLabels[key]} caption={fieldPaths[key]} onCopy={() => copy(text, fieldLabels[key])}><p className="field-screen">{text}</p></DetailField>;
     })}</div>}
-    <div className="dialog-actions">{item.kind === "template" ? files.length === 1 && <><button className="key hot-key" onClick={() => copy(files[0].content, "模板")}><Copy size={15}/>复制模板</button><button className="key" onClick={() => download(files[0].content, templateDownloadName(files[0], 0))}><Download size={15}/>下载 .prompt</button></> : hasPersonality && <><button className="key hot-key" onClick={() => exportPersonality("copy")}><Copy size={15}/>复制 MaiBot JSON</button><button className="key" onClick={() => exportPersonality("download")}><Download size={15}/>下载 .json</button></>}<button className="key" onClick={share}><ArrowUpRight size={15}/>复制链接</button>{item.mine && <button className="key" onClick={() => onEdit(item)}><Pencil size={15}/>编辑</button>}{item.mine && <button className="key danger-key" onClick={() => onDelete(item)}><Trash2 size={15}/>删除</button>}</div>
+    {webuiActions ? <MaibotImport item={item} notify={notify} onCopy={() => exportPersonality("copy")} onDownload={() => exportPersonality("download")} onShare={share}/> : <div className="dialog-actions">{item.kind === "template" ? files.length === 1 && <><button className="key hot-key" onClick={() => copy(files[0].content, "模板")}><Copy size={15}/>复制模板</button><button className="key" onClick={() => download(files[0].content, templateDownloadName(files[0], 0))}><Download size={15}/>下载 .prompt</button></> : hasPersonality && <><button className="key hot-key" onClick={() => exportPersonality("copy")}><Copy size={15}/>复制 MaiBot JSON</button><button className="key" onClick={() => exportPersonality("download")}><Download size={15}/>下载 .json</button></>}<button className="key" onClick={share}><ArrowUpRight size={15}/>复制链接</button>{ownerActions}</div>}
+    {webuiActions && item.mine && <div className="dialog-actions">{ownerActions}</div>}
     <div className="card-stats usage-summary" aria-label="作品使用统计"><UsageStats stats={stats}/></div>
     <CommunityPanel focusCommentId={focusCommentId} onLocated={onLocated} itemId={item.id} signedIn={signedIn} onLogin={onLogin} onStats={onStats}/>
   </WindowDialog>;

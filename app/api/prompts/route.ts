@@ -26,6 +26,7 @@ export async function GET(request: Request) {
   if (!isPromptSort(sort)) return Response.json({ error: "排序方式无效。" }, { status: 400 });
   if (version && !isValidVersion(version)) return Response.json({ error: "版本格式无效。" }, { status: 400 });
   const offset = Math.max(0, Math.min(100000, Number.parseInt(url.searchParams.get("offset") ?? "0", 10) || 0));
+  const pageSize = Math.max(1, Math.min(PAGE_SIZE, Number.parseInt(url.searchParams.get("limit") ?? "", 10) || PAGE_SIZE));
   const clauses = [];
   if (["config", "template"].includes(kind)) clauses.push(eq(prompts.kind, kind));
   if (kind !== "config" && templateCategories.some(value => value === category)) clauses.push(and(eq(prompts.kind, "template"), eq(prompts.category, category))!);
@@ -50,15 +51,15 @@ export async function GET(request: Request) {
       clauses.push(eq(prompts.ownerId,profile.userId));
     }
     const rows = await getDb().select().from(prompts).where(clauses.length ? and(...clauses) : undefined)
-      .orderBy(...(sort === "relevance" ? [desc(relevanceScore(query)), ...promptOrder("combined")] : promptOrder(sort))).limit(PAGE_SIZE + 1).offset(offset);
-    const authors = await authorMetadata(rows.slice(0, PAGE_SIZE).map(row => ({ userId: row.ownerId, author: row.author })));
-    const items = rows.slice(0, PAGE_SIZE).map(({ ownerId, minVersionKey, maxVersionKey, tags, fields, templateContent, templateFiles, ...row }) => ({
-      ...row, ...authors.get(ownerId), category: row.kind === "config" ? "" : row.category, scene: "", tags: JSON.parse(tags), fields: sharedConfigFields(JSON.parse(fields)), templateContent: templateContent.slice(0, 180),
+      .orderBy(...(sort === "relevance" ? [desc(relevanceScore(query)), ...promptOrder("combined")] : promptOrder(sort))).limit(pageSize + 1).offset(offset);
+    const authors = await authorMetadata(rows.slice(0, pageSize).map(row => ({ userId: row.ownerId, author: row.author })));
+    const items = rows.slice(0, pageSize).map(({ ownerId, minVersionKey, maxVersionKey, tags, fields, templateContent, templateFiles, ...row }) => ({
+      ...row, ...authors.get(ownerId), category: row.kind === "config" ? "" : row.category, scene: "", tags: JSON.parse(tags), fields: sharedConfigFields(JSON.parse(fields)), templateContent: templateContent.slice(0, 1200),
       templateFiles: templateFilesFor({ ...row, templateContent, templateFiles: JSON.parse(templateFiles) }).map(file => ({ ...file, content: file.content.slice(0, 180) })), mine: !!user && user.userId === ownerId,
       searchMatch: promptSearchMatch({ ...row, tags: JSON.parse(tags), fields: JSON.parse(fields), templateContent, templateFiles: JSON.parse(templateFiles) }, query, searchTags),
     }));
     const stats = await getCommunityStats([...items.map(item => item.id), ...samples.map(item => item.id)]);
-    return Response.json({ items, stats, hasMore: rows.length > PAGE_SIZE }, { headers: { "Cache-Control": "no-store" } });
+    return Response.json({ items, stats, hasMore: rows.length > pageSize }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Failed to load prompt library", error);
     return Response.json({ error: "作品暂时加载失败，请稍后重试。" }, { status: 503 });

@@ -1,0 +1,30 @@
+.panel {
+  flex: none;
+  min-height: 0;
+  height: clamp(360px, calc(100dvh - 340px), 900px);
+}
+
+.panel > :not(.viewport) {
+  flex-shrink: 0;
+}
+
+.viewport {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
+.viewport:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+}
+
+@media (max-width: 500px) {
+  .panel {
+    height: clamp(320px, calc(100dvh - 280px), 640px);
+  }
+}

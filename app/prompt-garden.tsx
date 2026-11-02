@@ -2,14 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowUpRight, Check, FileText, MessageSquareText, Plus, RefreshCw, Search, Sprout, Star, UserRound, X } from "lucide-react";
-import { AccountName } from "@/components/account-name";
-import { UsageStats } from "@/components/usage-stats";
+import { ArrowDown, Check, Plus, RefreshCw, Search, UserRound, X } from "lucide-react";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
-import { SearchMatch } from "@/components/search-match";
 import { readCatalogState, writeCatalogState } from "@/lib/catalog-url";
 
-import { TemplateFileList } from "@/components/template-file-list";
 import AccountPanel from "./account-panel";
 import PublicProfile, { type PublicProfileData } from "./public-profile";
 import NotificationCenter from "./notification-center";
@@ -19,39 +15,25 @@ import AnnouncementBoard from "./announcement-board";
 import { Led } from "@/components/retro";
 import { normalizeVersion, supportsVersion } from "@/lib/version-range.mjs";
 import { ThemeToggle } from "@/components/theme";
-import { fieldLabels, filledConfigFields, fuzzyMatches, promptTitle, samples, templateCategories, type Category, type CommunityStats, type Kind, type PromptItem } from "@/lib/prompts";
+import { MaibotReturnLink } from "@/components/maibot-bridge";
+import { fuzzyMatches, promptTitle, samples, templateCategories, type Category, type CommunityStats, type Kind, type PromptItem } from "@/lib/prompts";
 import { formatSearch, parseSearch } from "@/lib/search";
 import { promptSortOptions, type PromptSort } from "@/lib/prompt-sort";
 import PromptComposer from "./prompt-composer";
 import PromptDetail from "./prompt-detail";
 import { type LoginUser } from "./test-login";
+import { CatalogCard } from "@/components/catalog-card";
+import { useDesktopLayout } from "@/hooks/use-desktop-layout";
+import styles from "./catalog-layout.module.css";
 
 type Filter = "全部" | Category;
 type ListResponse = { error?: string; items?: PromptItem[]; stats?: Record<string, CommunityStats>; hasMore?: boolean };
 const emptyStats: CommunityStats = { average: null, ratingsCount: 0, commentCount: 0, copyCount: 0, downloadCount: 0 };
 
-function ArchiveCard({ item, stats, onOpen, onTag }: { item: PromptItem; stats: CommunityStats; onOpen: () => void; onTag: (tag: string) => void }) {
-  const fields = filledConfigFields(item.fields);
-  const firstValue = fields.length ? item.fields[fields[0]] : undefined;
-  const preview = item.kind === "template" ? item.templateContent : Array.isArray(firstValue) ? firstValue.join(" / ") : firstValue === undefined ? "" : String(firstValue);
-  const Icon = item.kind === "template" ? FileText : item.fields.personality ? Sprout : MessageSquareText;
-  return <article className="archive-card">
-    <button className="card-open" onClick={onOpen} aria-label={`查看 ${promptTitle(item)}`}>
-      <span className="card-topline"><span className="card-type">{item.kind === "template" ? item.category || "Prompt 模板" : `${fields.length} 项配置`}</span><span className="card-ref">{item.sample ? "SAMPLE" : item.kind === "template" ? "TEMPLATE" : "CONFIG"}{item.kind === "template" && item.templateLocale ? ` / ${item.templateLocale}` : ""}</span></span>
-      <span className="card-heading"><span className="card-icon"><Icon size={19}/></span><span className="card-name">{promptTitle(item)}</span><ArrowUpRight size={16}/></span>
-      {item.kind === "template" && <TemplateFileList item={item}/>}
-      {item.kind === "config" && <span className="card-contents">{fields.map(key => <span key={key}>{fieldLabels[key]}</span>)}</span>}
-      {item.description && <span className="card-description">{item.description}</span>}
-      {item.searchMatch ? <SearchMatch match={item.searchMatch}/> : <span className="card-preview"><span className="card-preview-text">{preview || "配置片段"}</span></span>}
-      <span className="card-stats"><span><Star size={13}/>{stats.average === null ? "暂无评分" : `${stats.average.toFixed(1)} (${stats.ratingsCount})`}</span><span><MessageSquareText size={13}/>{stats.commentCount}</span><UsageStats stats={stats}/></span>
-    </button>
-    <div className="card-bottom"><span className="card-author"><AccountName name={item.author} tag={item.authorTag} profileTag={item.authorProfileTag}/></span><span className="card-tags">{item.tags.slice(0, 2).map(tag => <button key={tag} onClick={() => onTag(tag)}>#{tag}</button>)}</span></div>
-  </article>;
-}
-
 export default function PromptGarden({ initialUser, initialView = "library", profile }: { initialUser: LoginUser | null; initialView?: "library" | "account" | "profile"; profile?: PublicProfileData }) {
   const isAccount = initialView === "account";
   const isProfile = initialView === "profile";
+  const desktopViewport = useDesktopLayout();
   const [focusCommentId,setFocusCommentId] = useState<string|null>(null);
   const [showAnnouncements, setShowAnnouncements] = useState(false);
   const [user, setUser] = useState(initialUser);
@@ -244,8 +226,8 @@ export default function PromptGarden({ initialUser, initialView = "library", pro
     catch (error) { setToast(error instanceof Error ? error.message : "删除失败。"); }
     finally { setDeletingId(null); }
   };
-  return <div className="desktop"><div className="app-window">
-    <header className="titlebar"><div className="brand"><Led/><span className="nameplate">MAI / PROMPT</span><span className="brand-cn">麦麦提示词库</span></div><div className="title-actions"><ThemeToggle/>{user && <NotificationCenter key={user.accountTag}/>} <AccountEntry signedIn={signedIn}/><button className="key hot-key publish-key" aria-label="发布作品" title="发布作品" onClick={() => { setEditingItem(null); if (signedIn) setComposing(true); else requestLogin(true); }}><Plus size={16}/><span>发布作品</span></button></div></header>
+  return <div className={`desktop ${!isAccount && !isProfile ? styles.catalog : ""}`}><div className="app-window">
+    <header className="titlebar"><div className="brand"><Led/><span className="nameplate">MAI / PROMPT</span><span className="brand-cn">麦麦提示词库</span></div><div className="title-actions"><MaibotReturnLink/><ThemeToggle/>{user && <NotificationCenter key={user.accountTag}/>} <AccountEntry signedIn={signedIn}/><button className="key hot-key publish-key" aria-label="发布作品" title="发布作品" onClick={() => { setEditingItem(null); if (signedIn) setComposing(true); else requestLogin(true); }}><Plus size={16}/><span>发布作品</span></button></div></header>
     <nav className={`folder-tabs ${isAccount || isProfile ? "" : "library-tabs"}`} aria-label="内容类型">{isAccount || isProfile ? <><Link className="folder-tab" href="/" prefetch={false}>返回提示词库</Link><span className="folder-tab selected">{isProfile ? "个人主页" : "账号中心"}</span></> : <><button className={`folder-tab ${!showAnnouncements && kind === "config" ? "selected" : ""}`} onClick={() => changeKind("config")} aria-pressed={!showAnnouncements && kind === "config"}>人格与聊天配置</button><button className={`folder-tab ${!showAnnouncements && kind === "template" ? "selected" : ""}`} onClick={() => changeKind("template")} aria-pressed={!showAnnouncements && kind === "template"}>Prompt 管理</button><button className={`folder-tab ${showAnnouncements ? "selected" : ""}`} onClick={() => { setShowAnnouncements(true); setLoading(false); }} aria-pressed={showAnnouncements}>公告栏</button></>}</nav>
     <main className="workspace">{isProfile && profile ? <PublicProfile profile={profile} onOpen={openItem}/> : isAccount ? user ? <AccountPanel onLogout={logout} user={user} revision={revision} onUser={next => { setUser(next); setRevision(value => value + 1); }} onOpen={openItem} onEdit={editItem} onDelete={remove} deletingId={deletingId} notify={setToast}/> : <div className="account-login-screen"><UserRound size={30}/><h1>账号中心</h1><button className="key hot-key" onClick={() => requestLogin()}>登录</button></div> : <><div className="workspace-heading"><div><div className="kicker"><span>◆</span> MAIBOT / PROMPT EXCHANGE</div><h1>{showAnnouncements ? "公告栏" : kind === "config" ? "人格与聊天配置" : "Prompt 管理"}<span> _</span></h1></div><div className="heading-status"><Led label="PUBLIC ACCESS"/></div></div>
       {showAnnouncements ? <AnnouncementBoard/> : <>
@@ -264,7 +246,7 @@ export default function PromptGarden({ initialUser, initialView = "library", pro
         </div>
         {kind === "template" && <div className="subcategories" role="group" aria-label="细分类别">{(["全部", ...templateCategories] as Filter[]).map(value => <button key={value} className={filter === value ? "active" : ""} onClick={() => setFilter(value)} aria-pressed={filter === value}>{value}</button>)}</div>}
         {loadError && <div className="load-error" role="alert">{loadError} <button onClick={() => setRevision(value => value + 1)}>重试</button></div>}
-        {visible.length ? <div className="card-grid">{visible.map(item => <ArchiveCard key={item.id} item={item} stats={stats[item.id] ?? emptyStats} onOpen={() => openItem(item)} onTag={chooseTag}/>)}</div> : !loading && <div className="empty-screen"><Search size={22}/><strong>没有找到作品</strong><span>换个关键词或标签试试</span></div>}
+        {visible.length ? <div className={`card-grid ${styles.grid}`}>{visible.map(item => <CatalogCard expandPreview={desktopViewport} key={item.id} item={item} stats={stats[item.id] ?? emptyStats} onOpen={() => openItem(item)} onTag={chooseTag}/>)}</div> : !loading && <div className="empty-screen"><Search size={22}/><strong>没有找到作品</strong><span>换个关键词或标签试试</span></div>}
         {hasMore && <div className="more-row"><button className="key" disabled={loading} onClick={loadMore}>{loading ? "加载中…" : "加载更多"}<ArrowDown size={14}/></button></div>}
       </section></>}
       </>}<div className="statusbar"><span><Led/> {loading ? "正在读取" : "就绪"}</span><span>MAIBOT COMMUNITY / PROMPTS</span><span>{user ? "已登录" : "访客模式"}</span></div>

@@ -61,3 +61,12 @@
 .tag-autocomplete{display:block;min-width:0;width:100%;flex:1}.tag-autocomplete input{width:100%;min-width:0}.tag-completion-menu{position:fixed;z-index:500;max-height:min(240px,45vh);overflow:auto;margin:0;padding:4px;list-style:none;border:2px solid var(--line);background:var(--panel);color:var(--ink);box-shadow:var(--raised),4px 5px 0 var(--float-shadow);font-family:var(--font)}.tag-completion-menu li{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:36px;padding:7px 9px;cursor:pointer;font-size:13px}.tag-completion-menu li[aria-selected=true]{background:var(--mint);color:var(--on-ink)}.tag-completion-menu li>span{overflow-wrap:anywhere;min-width:0}.tag-completion-menu small{white-space:nowrap;color:var(--muted);font-size:11px}.tag-completion-menu li[aria-selected=true] small{color:var(--on-ink)}.search-match{display:grid;gap:5px;margin:8px 0;padding:9px;background:var(--screen);border:1px solid var(--line);min-width:0;overflow-wrap:anywhere;font-size:11px;line-height:1.7;color:var(--screen-ink)}.search-match>small{font-size:10px;color:var(--muted)}.search-match>span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}.search-match mark{background:var(--mint);color:var(--on-ink);padding:0 1px}.tag-autocomplete-publish input{margin-top:0}@media(max-width:500px){.library-toolbar .sort-options{flex-wrap:wrap}.library-toolbar .sort-options button{flex:1;min-width:0}.search-match{padding:7px}}
 
 @container(max-width:440px){.search-row{grid-template-columns:minmax(0,1fr)}.search-row .version-input{width:min(176px,100%);justify-self:end}}
+
+/* Share desktop window dimensions while preserving the mobile layout. */
+@media (min-width:781px){
+.desktop{--desktop-padding:28px;padding:28px calc(clamp(20px,6vw,104px) + 40px)}
+.app-window{width:100%;max-width:1440px;min-height:calc(100vh - 2 * var(--desktop-padding))}
+.folder-tab{min-width:184px}
+.workspace{min-width:0}
+.card-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+}
